@@ -1,65 +1,133 @@
+﻿import { Button } from "@/components/ui/button";
+import qs from "qs";
+import Link from "next/link";
 import Image from "next/image";
+import { Clock, CheckCircle, Cloud } from "lucide-react"; // Імпортуємо іконки
 
-export default function Home() {
+// ОНОВЛЕНИЙ ЗАПИТ: Тепер ми просимо у Strapi віддати дані обох секцій
+const homePageQuery = qs.stringify({
+  populate: {
+    blocks: {
+      on: {
+        "blocks.hero-section": {
+          populate: {
+            image: {
+              fields: ["url", "alternativeText"],
+            },
+            link: {
+              populate: true,
+            },
+          },
+        },
+        // ДОДАЛИ ЗАПИТ ДЛЯ НОВОЇ СЕКЦІЇ ПЕРЕВАГ
+        "blocks.features-section": {
+          populate: {
+            feature: {
+              populate: true,
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+async function getHomePageData() {
+  const res = await fetch(`http://localhost:1337/api/home-page?${homePageQuery}`);
+  if (!res.ok) {
+    throw new Error(`Не вдалося завантажити дані. Статус: ${res.status}`);
+  }
+  return res.json();
+}
+
+// Допоміжна функція, яка перетворює текст зі Strapi (CLOCK) на реальну іконку
+function FeatureIcon({ name }: { name: string }) {
+  switch (name) {
+    case "CLOCK":
+      return <Clock className="w-12 h-12 mb-4 text-blue-500" />;
+    case "CHECK":
+      return <CheckCircle className="w-12 h-12 mb-4 text-green-500" />;
+    case "CLOUD":
+      return <Cloud className="w-12 h-12 mb-4 text-purple-500" />;
+    default:
+      return null;
+  }
+}
+
+export default async function Home() {
+  const strapiData = await getHomePageData();
+  
+  if (!strapiData?.data?.blocks) {
+    return <div className="p-20 text-center text-xl">Блоки не знайдені.</div>;
+  }
+
+  // Розумний пошук: шукаємо потрібний блок за його типом (__component)
+  const heroSection = strapiData.data.blocks.find((block: any) => block.__component === "blocks.hero-section");
+  const featuresSection = strapiData.data.blocks.find((block: any) => block.__component === "blocks.features-section");
+
+  const imageUrl = heroSection?.image?.url ? `http://localhost:1337${heroSection.image.url}` : null;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="flex flex-col items-center justify-center min-h-screen">
+      
+      {/* 1. HERO SECTION */}
+      {heroSection && (
+        <section className="container mx-auto py-20 flex flex-col items-center text-center space-y-6">
+          <h1 className="text-5xl font-bold tracking-tight">{heroSection.heading}</h1>
+          <p className="text-xl text-muted-foreground max-w-[600px]">
+            {heroSection.subHeading}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+          {imageUrl && (
+            <div className="relative w-full max-w-2xl h-64 my-8 rounded-lg overflow-hidden shadow-lg">
+               <Image 
+                 src={imageUrl} 
+                 alt={heroSection.image?.alternativeText || "Hero Image"}
+                 fill
+                 className="object-cover"
+               />
+            </div>
+          )}
+          
+          {heroSection.link && (
+            <Link href={heroSection.link.url} target={heroSection.link.isExternal ? "_blank" : "_self"}>
+              <Button size="lg" className="mt-4">
+                {heroSection.link.text}
+              </Button>
+            </Link>
+          )}
+        </section>
+      )}
+
+      {/* 2. FEATURES SECTION */}
+      {featuresSection && (
+        <section className="w-full py-24 bg-slate-50 dark:bg-slate-900">
+          <div className="container mx-auto px-4 text-center">
+            
+            {/* Заголовок та опис секції */}
+            <h2 className="text-3xl font-bold mb-4">{featuresSection.title}</h2>
+            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+              {featuresSection.description}
+            </p>
+
+            {/* Сітка з картками (масив) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {featuresSection.feature.map((feat: any, index: number) => (
+                <div 
+                  key={index} 
+                  className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border flex flex-col items-center text-center hover:shadow-md transition-shadow"
+                >
+                  <FeatureIcon name={feat.icon} />
+                  <h3 className="text-xl font-semibold mb-2">{feat.heading}</h3>
+                  <p className="text-muted-foreground">{feat.subHeading}</p>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </section>
+      )}
+
+    </main>
   );
 }
