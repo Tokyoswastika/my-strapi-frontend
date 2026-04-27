@@ -1,4 +1,4 @@
-﻿import { Button } from "@/components/ui/button";
+﻿import { Button } from "../components/ui/button";
 import qs from "qs";
 import Link from "next/link";
 import Image from "next/image";
