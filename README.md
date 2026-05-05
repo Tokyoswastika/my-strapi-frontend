@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎯 Проєкт "Jarvis": AI-Driven Video Summarization Tool
 
-## Getting Started
+**Дисципліна:** Архітектура програмного забезпечення (Практикум №2.3)  
+**Тема:** Headless CMS як керований PaaS (Strapi + Next.js + Vercel)  
+**Виконав:** магістр 1 курсу, група 141 (ПЗС), **Довгаль К.В.** **Університет:** ЧНУ ім. Юрія Федьковича
 
-First, run the development server:
+---
 
+## 📝 Опис проєкту
+**"Jarvis"** — це інтелектуальна екосистема для автоматизації створення конспектів на основі YouTube-відео. Проєкт демонструє переваги сучасної архітектури **Decoupled Headless CMS**, де інтерфейс користувача та система управління контентом існують незалежно, взаємодіючи через оптимізоване REST API.
+
+**Ключова мета:** Вирішення проблеми перенасичення інформацією шляхом швидкої трансформації відеоконтенту у структуровані текстові конспекти з можливістю їх подальшого зберігання, редагування та зручного пошуку.
+
+---
+
+## 🏗 Архітектурні рішення (C4 Model)
+Архітектура побудована на принципі **Separation of Concerns (SoC)**, що дозволяє незалежно масштабувати фронтенд та бекенд, мінімізуючи зв'язність (coupling) між компонентами.
+
+### Level 1: System Context (Загальний контекст)
+Діаграма відображає місце системи Jarvis у загальному середовищі та її взаємодію з зовнішніми сервісами (YouTube API для отримання даних та Strapi для автентифікації).
+
+![System Context](./image/System%20Context%20Diagram.jpg)
+
+### Level 2: Container Diagram (Діаграма контейнерів)
+Деталізація технологічного стеку та внутрішньої взаємодії компонентів системи. Фронтенд на Next.js взаємодіє з бекендом Strapi через REST API, а Strapi, у свою чергу, керує даними в PostgreSQL.
+
+![Container Diagram](./image/Container%20Diagram.jpg)
+
+## ✅ Виконані етапи розробки (Roadmap)
+
+В межах практикуму було **повністю реалізовано всі 10 етапів розробки**, передбачених навчальною програмою:
+
+1.  **Основи проекту:** Ініціалізація Next.js 15 та Strapi 5.
+2.  **Home Page:** Побудова структури головної сторінки.
+3.  **UI Components:** Реалізація Features Section, TopNavigation та Footer.
+4.  **Auth System:** Впровадження повноцінної реєстрації та входу користувачів (JWT + Cookies).
+5.  **File Upload:** Обробка завантаження файлів через Server Actions.
+6.  **AI Integration:** Створення логіки конспектування відео за допомогою AI SDK.
+7.  **CRUD & Permissions:** Налаштування прав доступу на рівні ролей Strapi (Public/Authenticated).
+8.  **Search & Pagination:** Реалізація динамічного пошуку з `use-debounce` та серверної пагінації.
+9.  **Backend Cloud:** Деплой бекенду на **Strapi Cloud** (PostgreSQL).
+10. **Frontend Cloud:** Деплой фронтенду на **Vercel**.
+
+---
+
+## 🚀 Реалізований функціонал
+
+*   **Автентифікація (Частина 4):** Повний цикл Login/Register. Захист маршрутів (Protected Routes) через `Middleware` Next.js. Використання JWT для авторизації запитів.
+*   **AI Summarization (Частина 6):** Автоматична генерація текстового резюме на основі введеного URL відео за допомогою інтеграції AI SDK.
+*   **Управління контентом (Частина 7):** Повний CRUD цикл (Create, Read, Update, Delete) для персональних конспектів користувача.
+*   **Оптимізація (Частина 8):** Stateless пагінація та пошук, що зберігають стан в URL, з використанням дебаунсу для зменшення навантаження на API.
+
+---
+
+## 🛠 Технологічний стек
+
+* **Frontend:** **Next.js 15 (App Router)**. Використовуються серверні компоненти (RSC) для максимальної швидкості завантаження та TypeScript для забезпечення суворої типізації даних. Розгорнуто на **Vercel**.
+* **Backend:** **Strapi 5 (Headless CMS)**. Виступає як гнучкий Content API. Забезпечує управління схемами даних, медіа-файлами та автентифікацію користувачів. Розгорнуто на **Strapi Cloud**.
+* **Database:** **PostgreSQL**. Керована база даних (PaaS), що забезпечує надійне збереження конспектів, профілів користувачів та зв'язків між ними.
+* **State Management:** Використання **URL-параметрів** для збереження стану фільтрації та пагінації (Stateless approach), що робить систему зручною для поширення посилань.
+
+---
+
+
+---
+
+## 💻 Інструкція із запуску (Local Development)
+
+Для локального запуску необхідно клонувати репозиторій та налаштувати середовище для обох частин проєкту.
+
+### 1. Бекенд (Strapi)
 ```bash
+cd backend
+npm install
+npm run develop
+Адмін-панель доступна за адресою: http://localhost:1337/admin
+
+2. Фронтенд (Next.js)
+Створіть файл .env.local у папці frontend:
+NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+
+Bash
+cd frontend
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Додаток буде доступний за адресою: http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🔗 Посилання на розгорнуті сервіси
+🌍 Live Frontend (Vercel): https://my-strapi-frontend.vercel.app
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+⚙️ API Backend (Strapi Cloud): https://inviting-wealth-b9db906161.strapi.app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📦 GitHub Repository: https://github.com/Tokyoswastika/my-strapi-frontend
+📦 GitHub Repository: https://github.com/Tokyoswastika/my-strapi-backend
