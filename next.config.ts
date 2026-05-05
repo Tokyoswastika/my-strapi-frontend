@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
     // Ігноруємо помилки лінтера під час збірки
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "1337",
+        pathname: "/uploads/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
